@@ -1,4 +1,4 @@
-# QA Automation Technical Assessment
+# QA Automation Technical Assessment  UPDATED FOR INSTRUCTION
 
 ## Overview
 
