@@ -11,44 +11,44 @@ class IssuesPage:
         self.confirm_bar = self.inner_frame.locator("#confirmBar")
         self.selected_count_span = self.inner_frame.locator("#selectedCount")
 
-    
 
-
-    def record_final_value_before_change(self, card_index: int):
-        #Extracts the original row value and asserts that the final row matches it.
+    def record_final_value_before_change(self, card_index: int, column: str):
         card = self.cards_locator.nth(card_index)
-        
-        # Locators on this card
-        final_span = card.locator("tr[data-row-type='final'] div.cell-editable span")
+     
+        # Targets the editable div by its data-field attribute
+        final_span = card.locator(f"tr[data-row-type='final'] div[data-field='{column}'] span")
 
+        expect(final_span).to_be_visible()
         current_value = final_span.text_content().strip()
-        print(f"Current Final Value for card {card_index + 1}: {current_value}")
+        print(f"Current Final Value for card {card_index + 1} ({column}): {current_value}")
         return current_value
 
 
-    def select_original_value_for_card(self, card_index: int):
-       #Clicks the original radio button for a given card index.
+    def select_original_value_for_card(self, card_index: int, column: str):
         card = self.cards_locator.nth(card_index)
-        original_row = card.locator("tr[data-row-type='original']")
-        
-        original_row.get_by_role("radio", name="Select original value:").click()
 
-    def verify_final_value_matches_original(self, card_index: int):
-        #Extracts the original row value and asserts that the final row matches it.
+        # Locates the original data row
+        original_row = card.locator("tr[data-row-type='original']")
+    
+        # Target the input directly using its precise value attribute
+        radio_button = original_row.locator("input[type='radio'][value='original']")
+
+        expect(radio_button).to_be_visible()
+        radio_button.click()
+
+    def verify_final_value_matches_original(self, card_index: int, column: str):
         card = self.cards_locator.nth(card_index)
-        
-        # Locators on this card
-        original_span = card.locator("tr[data-row-type='original'] td.cell-issue span")
-        final_span = card.locator("tr[data-row-type='final'] div.cell-editable span")
-        
-        # Extract the expected text from the original row
+     
+        original_span = card.locator("tr[data-row-type='original'] label.cell-radio span")
+        final_span = card.locator(f"tr[data-row-type='final'] div[data-field='{column}'] span")
+     
+        expect(original_span).to_be_visible()
         expected_text = original_span.text_content().strip()
-        
-        # Assert the final matches the text
+     
         expect(final_span).to_have_text(expected_text)
 
         updated_text = final_span.text_content().strip()
-        print(f"Changed Final Value for card {card_index + 1}: {updated_text}")
+        print(f"Changed Final Value for card {card_index + 1} ({column}): {updated_text}")
         return updated_text
 
     def get_card_by_sfid(self, sfid: str):

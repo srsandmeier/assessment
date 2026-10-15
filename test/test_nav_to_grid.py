@@ -90,22 +90,25 @@ def test_update_issue_value_radio(page: Page):
     expect(issues_page.inner_frame.locator("#breadcrumb-current")).to_have_text("Data Issues")
     expect(issues_page.inner_frame.locator("[class='issue-card']").first).to_be_visible()
 
-       # Locate the 7th issue card specifically (index 6)
+    # Locate the 7th issue card specifically (index 6)
     seventh_card = issues_page.cards_locator.nth(6)
     
-    # Verify the 7th card is visible before interacting
+    # Verify the 7th card is visible
     expect(seventh_card).to_be_visible()
     
-    # Verification it is the correct card by checking the original SFID value
+    phone_header = seventh_card.locator("th", has=page.locator("span", has_text="Phone"))
+    expect(phone_header).to_be_visible()
+
+    # Verify it is the correct card by checking the originalvalue
     original_sfid_locator = seventh_card.locator("tr[data-row-type='original'] td:last-child span")
     if original_sfid_locator.count() > 0:
         sfid_value = original_sfid_locator.text_content().strip()
         print(f"\n[INFO] 7th Card SFID: {sfid_value}")
 
-    issues_page.record_final_value_before_change(6)
-
-    issues_page.select_original_value_for_card(6)
-    issues_page.verify_final_value_matches_original(6)
+    column_name = "Phone"
+    issues_page.record_final_value_before_change(6, column=column_name)
+    issues_page.select_original_value_for_card(6, column=column_name)
+    issues_page.verify_final_value_matches_original(6, column=column_name)
     print("---------------------------------------------------\n")
 
 def test_update_issue_value_text(page: Page):
