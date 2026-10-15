@@ -25,6 +25,15 @@ In a second terminal, run the tests from the repository root:
 python -m pytest -s --headed
 ```
 
+To run one test at a time In a second terminal, run the tests from the test folder with the test file and test name like:
+
+```powershell
+cd test
+```
+```powershell
+pytest test_nav_to_grid.py -k "test_cards_have_sfid"
+```
+
 Open `http://localhost:8080/index.html` in a browser to explore the application before writing tests.
 
 ## Tests to Implement
