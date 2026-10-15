@@ -1,5 +1,6 @@
 import re
 from playwright.sync_api import Page, expect, TimeoutError as PlaywrightTimeoutError
+import test
 from Pages.Dashboard_page import DashboardPage
 from Pages.Issues_page import IssuesPage
 
@@ -7,7 +8,7 @@ def test_has_grid(page: Page):
     dashboard_page = DashboardPage(page)
     page.goto("http://localhost:8080/index.html")
 
-
+    print(f"\n[INFO] Starting {test_has_grid.__name__}: test to validate the Data Issues grid and issue cards.")
     ### Test 1: Navigate to the Data Issues grid
     #Navigate to the Data Issues page and assert that 10 issue cards are displayed.
 
@@ -42,43 +43,47 @@ def test_has_grid(page: Page):
     # There would also be a test to validate the data sent in the API matches the DB
     expected = 10
     expect(inner_frame.locator("[class='issue-card']")).to_have_count(expected)
-    print(f"{test_has_grid.__name__}: [INFO] Expected number of issue cards: {expected} Actual: {inner_frame.locator('[class=\"issue-card\"]').count()}")
+    print(f"[INFO] Expected number of issue cards: {expected} Actual: {inner_frame.locator('[class=\"issue-card\"]').count()}")
+    print("---------------------------------------------------\n")
 
 def test_cards_have_sfid(page: Page):
     dashboard_page = DashboardPage(page)
     issues_page = IssuesPage(page)
 
     ### Test 2: Extract and validate all issue data
-
     #From the Data Issues grid, extract the original row data from all 10 issue cards. Assert that each card's original row contains a non-empty sfid value.
 
     dashboard_page.navigate_to_issues()
 
     expect(issues_page.inner_frame.locator("#breadcrumb-current")).to_have_text("Data Issues")
     expect(issues_page.cards_locator.first).to_be_visible()
+    expect(issues_page.cards_locator).to_have_count(10)
 
     # Get the original row data from all 10 issue cards
 
     cards_list = issues_page.cards_locator.all()
+    print(f"\n[INFO] Starting test {test_cards_have_sfid.__name__}: to extract and validate SFID values from all issue cards.")
+    print(f"[INFO] Extracting SFID Values for {len(cards_list)} Cards ---")
 
     #Loop through each card
     for card in cards_list:
+        index = cards_list.index(card)
         original_sfid_locator = card.locator("tr[data-row-type='original'] td:last-child span")
     
-        # Ensure the element exists before grabbing text to prevent strictness/timeout issues
-        if original_sfid_locator.count() > 0:
-            sfid_value = original_sfid_locator.text_content().strip()
-            
-            if sfid_value and sfid_value != "—":
-                print(f"{test_cards_have_sfid.__name__}: Verified Original SFID: {sfid_value}")
+        expect(original_sfid_locator).to_be_visible()
+        
+        sfid_text = original_sfid_locator.text_content().strip()
+        
+        print(f"[INFO] Card #{index + 1}: Verified Original SFID: {sfid_text}")
+        assert sfid_text != "" and sfid_text != "—", f"Card #{index + 1} has an invalid sfid: '{sfid_text}'"
+    print("---------------------------------------------------\n")
 
 def test_update_issue_value_radio(page: Page):
     dashboard_page = DashboardPage(page)
     issues_page = IssuesPage(page)
-
-### Test 3: Select a specific issue and change its value
-
-#Locate the 7th issue card on the grid. Select the **original** value for the issue column. Assert that the final row updated to reflect the original value.
+    print(f"\n[INFO] Starting test {test_update_issue_value_radio.__name__}: to update issue value using radio button selection.")
+    ### Test 3: Select a specific issue and change its value
+    #Locate the 7th issue card on the grid. Select the **original** value for the issue column. Assert that the final row updated to reflect the original value.
 
     dashboard_page.navigate_to_issues()
 
@@ -95,17 +100,18 @@ def test_update_issue_value_radio(page: Page):
     original_sfid_locator = seventh_card.locator("tr[data-row-type='original'] td:last-child span")
     if original_sfid_locator.count() > 0:
         sfid_value = original_sfid_locator.text_content().strip()
-        print(f"{test_update_issue_value_radio.__name__}: 7th Card SFID: {sfid_value}")
+        print(f"\n[INFO] 7th Card SFID: {sfid_value}")
 
     issues_page.record_final_value_before_change(6)
 
     issues_page.select_original_value_for_card(6)
     issues_page.verify_final_value_matches_original(6)
-
+    print("---------------------------------------------------\n")
 
 def test_update_issue_value_text(page: Page):
     dashboard_page = DashboardPage(page)
     issues_page = IssuesPage(page)
+    print(f"\n[INFO] Starting test {test_update_issue_value_text.__name__}:to update issue value using text input.") 
 
     ### Test 4: Edit a final row field
     #Locate the issue card with sfid `00Qak00000RHtuzEAD`. 
@@ -123,11 +129,12 @@ def test_update_issue_value_text(page: Page):
 
     issues_page.edit_street_field_by_sfid(target_sfid, "123 Test Street")
 
+    print("---------------------------------------------------\n")
 
 def test_select_issues_multiple(page: Page):
     dashboard_page = DashboardPage(page)
     issues_page = IssuesPage(page)
-
+    print(f"\n[INFO] Starting test {test_select_issues_multiple.__name__}: to select multiple issues.")
     ### Test 5: Checkbox selection count
     #select the checkboxes on the 1st, 3rd, and 5th issue cards. 
     #Assert the selection counter shows `3 issue(s) selected`. 

@@ -110,7 +110,7 @@ class IssuesPage:
             expect(self.confirm_bar).to_have_class("confirm-bar")
 
             expect(self.selected_count_span).to_have_text("0")
-            print("[SUCCESS] Confirm bar hidden and count reset to 0.")
+            print("[SUCCESS] Confirm bar hidden and count set to 0.")
 
     def unselect_cards_by_numbers(self, card_numbers: list[int]):
         #Loops through list and unchecks them.
